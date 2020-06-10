@@ -2,7 +2,6 @@ package routing.routing.filters;
 
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
-import com.netflix.zuul.exception.ZuulException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -19,7 +18,7 @@ public class RoutFilter extends ZuulFilter {
         return true;
     }
 
-    public Object run() throws ZuulException {
+    public Object run()  {
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletRequest request = ctx.getRequest();
         return null;
