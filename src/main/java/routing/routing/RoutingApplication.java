@@ -14,9 +14,9 @@ public class RoutingApplication {
 		SpringApplication.run(RoutingApplication.class, args);
 	}
 
-	@Bean
-	public RoutFilter filter() {
-		return new RoutFilter();
-	}
+//	@Bean
+//	public RoutFilter filter() {
+//		return new RoutFilter();
+//	}
 
 }
