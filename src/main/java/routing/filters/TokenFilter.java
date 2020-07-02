@@ -14,9 +14,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.servlet.http.HttpServletRequest;
 
 public class TokenFilter extends ZuulFilter {
-    private static final String PATH_LOGIN  = "/account/{lang}/v1/login";
+    private static final String PATH_LOGIN = "/account/{lang}/v1/login";
     private static final String PATH_REGISTRATION = "/account/{lang}/v1";
-    private static final String PATH_VALIDATION  = "https://propetsaccountin.herokuapp.com/account/{lang}/v1/validation/update";
+    private static final String PATH_VALIDATION = "https://propetsaccountin.herokuapp.com/account/{lang}/v1/validation/update";
 
     @Override
     public String filterType() {
@@ -37,14 +37,14 @@ public class TokenFilter extends ZuulFilter {
     public Object run() throws ZuulException {
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletRequest request = ctx.getRequest();
-        String [] tempPath = request.getServletPath().split("/");
-        String path = tempPath[tempPath.length];
-        if (request.getMethod().equals(RequestMethod.PUT) && path.equals(PATH_LOGIN) || path.equals(PATH_REGISTRATION)){
+        String[] tempPath = request.getServletPath().split("/");
+        boolean pathWithToken = isPathWithToke(tempPath, request);
+        if (pathWithToken) {
             return null;
         }
 
         String token = request.getHeader("X-Token");
-        if (token == null){
+        if (token == null) {
             throw new ZuulException("Request with X-Token", 404, "Request with X-Token");
         }
         RestTemplate restTemplate = new RestTemplate();
@@ -55,11 +55,20 @@ public class TokenFilter extends ZuulFilter {
         ResponseEntity<String> response =
                 restTemplate.exchange(tokenRequest, String.class);
         boolean valid = Boolean.getBoolean(response.getHeaders().getFirst("Valid"));
-        if (!valid){
+        if (!valid) {
             throw new ZuulException("Request with X-Token", 404, "Token not a valid");
         }
         token = response.getHeaders().getFirst("X-Token");
         ctx.addZuulRequestHeader("X-Token", token);
         return null;
+    }
+
+    private boolean isPathWithToke(String[] tempPath, HttpServletRequest request) {
+        boolean register = tempPath[1].equals("account") && tempPath[tempPath.length - 1].equals("login") && request.getMethod().equals("POST");
+        boolean login = tempPath[1].equals("account") && tempPath[tempPath.length - 1].equals("v1") && request.getMethod().equals("POST");
+        boolean validate = tempPath[1].equals("account") && tempPath[tempPath.length - 1].equals("update") && request.getMethod().equals("PUT");
+        if (register || login||validate){
+            return true;
+        }else return false;
     }
 }
