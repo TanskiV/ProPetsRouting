@@ -54,7 +54,7 @@ public class TokenFilter extends ZuulFilter {
         RequestEntity<String> tokenRequest = new RequestEntity<>(headers, HttpMethod.PUT, uriBuilder.build().toUri());
         ResponseEntity<String> response =
                 restTemplate.exchange(tokenRequest, String.class);
-        boolean valid = Boolean.getBoolean(response.getHeaders().getFirst("Valid"));
+        boolean valid = Boolean.parseBoolean(response.getHeaders().getFirst("Valid"));
         if (!valid) {
             throw new ZuulException("Request with X-Token", 404, "Token not a valid");
         }
