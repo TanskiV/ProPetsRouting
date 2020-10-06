@@ -45,7 +45,7 @@ public class TokenFilter extends ZuulFilter {
 
         String token = request.getHeader("X-Token");
         if (token == null) {
-            throw new ZuulException("Request with X-Token", 500, "Invalid token");
+            throw new ZuulException("Request with X-Token", 500, "Token not found");
         }
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -54,14 +54,13 @@ public class TokenFilter extends ZuulFilter {
         RequestEntity<String> tokenRequest = new RequestEntity<>(headers, HttpMethod.PUT, uriBuilder.build().toUri());
         ResponseEntity<String> response;
         try {
-            response =
-                    restTemplate.exchange(tokenRequest, String.class);
+            response = restTemplate.exchange(tokenRequest, String.class);
         }catch (Exception e){
             throw new ZuulException("Request with X-Token", 500, "Invalid token");
         }
         boolean valid = Boolean.parseBoolean(response.getHeaders().getFirst("Valid"));
         if (!valid) {
-            throw new ZuulException("Request with X-Token", 500, "Invalid token");
+            throw new ZuulException("Request with X-Token", 500, "Token not valid");
         }
         token = response.getHeaders().getFirst("X-Token");
         ctx.addZuulRequestHeader("X-Token", token);
